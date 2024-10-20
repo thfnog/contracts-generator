@@ -12,7 +12,7 @@ function initializeFirestoreClient(): FirestoreClient {
     $base64Credentials = getenv('FIREBASE_CREDENTIALS');
     if ($base64Credentials) {
         $decodedCredentials = base64_decode($base64Credentials);
-        $credentialsArray = json_decode($credentialsJson, true);
+        $credentialsArray = json_decode($decodedCredentials, true);
 
         // Create Firebase instance using the decoded credentials
         $factory = (new Factory)->withServiceAccount($credentialsArray);
