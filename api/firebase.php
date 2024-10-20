@@ -9,6 +9,13 @@ use Google\Cloud\Firestore\FirestoreClient;
  * @return FirestoreClient
  */
 function initializeFirestoreClient(): FirestoreClient {
+    $base64Credentials = getenv('FIREBASE_CREDENTIALS');
+    if ($base64Credentials) {
+        $decodedCredentials = base64_decode($base64Credentials);
+        $filePath = __DIR__ . '/../firebase_credentials.json';
+        file_put_contents($filePath, $decodedCredentials);
+    }
+
     $projectId = 'contracts-generator';
     $firestore = new FirestoreClient([
         'projectId' => $projectId,
