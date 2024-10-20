@@ -1,6 +1,7 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
 include 'client_manager.php';
-require 'vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;
 use Dompdf\Dompdf;
@@ -31,11 +32,11 @@ $clients = getClients();
 
 function generateContractPDF($client, $contractTypes) {
     $zip = new ZipArchive();
-    $zipFileName = 'contracts/' . $client['nome'] . '_contracts.zip';
+    $zipFileName = __DIR__ . '/../contracts/' . $client['nome'] . '_contracts.zip';
     $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
     foreach($contractTypes as $contractType) {
-        $templatePath = __DIR__ . "../templates/{$contractType}.docx";
+        $templatePath = __DIR__ . "/../templates/{$contractType}.docx";
         if (!file_exists($templatePath)) {
             echo "Template not found for contract type: $contractType";
             return;
@@ -77,7 +78,7 @@ function generateContractPDF($client, $contractTypes) {
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
     
         // Save the filled template as a temporary .docx file
-        $tempDocxPath = '../contracts/' . $client['nome'] . '_' . $contractType . '.docx';
+        $tempDocxPath = __DIR__ . '/../contracts/' . $client['nome'] . '_' . $contractType . '.docx';
         $templateProcessor->saveAs($tempDocxPath);
 
         // Convert the .docx file to PDF
@@ -86,12 +87,12 @@ function generateContractPDF($client, $contractTypes) {
         //convertDocxToPDF($tempDocxPath, $fileName);
 
         // Upload the DOCX file to Google Drive
-        $fileId = uploadToGoogleDrive($tempDocxPath, $fileName, $folderId);
-        if ($fileId) {
-            echo "Contract uploaded successfully: {$fileName} (ID: {$fileId})";
-        } else {
-            echo "Failed to upload contract: {$fileName}";
-        }
+        //$fileId = uploadToGoogleDrive($tempDocxPath, $fileName, $folderId);
+        //if ($fileId) {
+        //    echo "Contract uploaded successfully: {$fileName} (ID: {$fileId})";
+        //} else {
+        //    echo "Failed to upload contract: {$fileName}";
+        //}
     
         // Serve the DOCX file for download
         if (count($contractTypes) > 1) {
@@ -133,7 +134,7 @@ function generateContractPDF($client, $contractTypes) {
             header('Expires: 0');
             readfile($zipFileName);
     
-            $mask = 'contracts/' . $client['nome'] . '_' . '*.*';
+            $mask = __DIR__ . '/../contracts/' . $client['nome'] . '_' . '*.*';
             array_map('unlink', glob($mask));
     
             exit();
@@ -146,7 +147,7 @@ function generateContractPDF($client, $contractTypes) {
 
 function convertDocxToPDF2($docxFilePath, $fileName) {
     $DS = DIRECTORY_SEPARATOR;
-    $outputDir = __DIR__ . "{$DS}contracts";
+    $outputDir = __DIR__ . "/{$DS}contracts";
 
     // Ensure the output directory exists
     if (!is_dir($outputDir)) {
@@ -164,7 +165,7 @@ function convertDocxToPDF2($docxFilePath, $fileName) {
 function convertDocxToPDF($docxFilePath, $fileName) {
     // Load the .docx file content
     $phpWord = \PhpOffice\PhpWord\IOFactory::load($docxFilePath);
-    $pdfFilePath = '../contracts/' . $fileName . '_' . time() . '.pdf';
+    $pdfFilePath = __DIR__ . '/../contracts/' . $fileName . '_' . time() . '.pdf';
 
     // Convert .docx content to HTML
     $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
@@ -230,7 +231,7 @@ function convertToWords($number)
 function uploadToGoogleDrive($filePath, $fileName, $folderId) {
     // Initialize the Google Client
     $client = new Google_Client();
-    $client->setAuthConfig('../google_credentials.json');
+    $client->setAuthConfig(__DIR__ . '/../google_credentials.json');
     $client->addScope(Google_Service_Drive::DRIVE_FILE);
     $client->setAccessType('offline');
 
