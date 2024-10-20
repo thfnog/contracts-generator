@@ -11,12 +11,11 @@ use Google\Cloud\Firestore\FirestoreClient;
 function initializeFirestoreClient(): FirestoreClient {
     $base64Credentials = getenv('FIREBASE_CREDENTIALS');
     if ($base64Credentials) {
-        $decodedCredentials = base64_decode($base64Credentials);
-        $credentialsArray = json_decode($decodedCredentials, true);
+        $decodedCredentials = json_decode(base64_decode($base64Credentials), true);
 
-        // Create Firebase instance using the decoded credentials
-        $factory = (new Factory)->withServiceAccount($credentialsArray);
-        $firebase = $factory->create();
+        // Use $decodedCredentials as an array in your Firebase initialization.
+        $firebase = new \Firebase\ServiceAccount();
+        $firebase = $firebase->withArray($decodedCredentials);
     } else {
         $projectId = 'contracts-generator';
         $firestore = new FirestoreClient([
