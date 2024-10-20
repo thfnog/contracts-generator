@@ -14,7 +14,7 @@ function initializeFirestoreClient(): FirestoreClient {
         $decodedCredentials = json_decode(base64_decode($base64Credentials), true);
 
         // Use $decodedCredentials as an array in your Firebase initialization.
-        $firebase = new \Firebase\ServiceAccount();
+        $firebase = new FirestoreClient();
         $firebase = $firebase->withArray($decodedCredentials);
     } else {
         $projectId = 'contracts-generator';
