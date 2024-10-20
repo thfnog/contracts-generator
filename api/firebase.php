@@ -12,15 +12,18 @@ function initializeFirestoreClient(): FirestoreClient {
     $base64Credentials = getenv('FIREBASE_CREDENTIALS');
     if ($base64Credentials) {
         $decodedCredentials = base64_decode($base64Credentials);
-        $filePath = __DIR__ . '/../firebase_credentials.json';
-        file_put_contents($filePath, $decodedCredentials);
-    }
+        $credentialsArray = json_decode($credentialsJson, true);
 
-    $projectId = 'contracts-generator';
-    $firestore = new FirestoreClient([
-        'projectId' => $projectId,
-        'keyFilePath' => __DIR__ . '/../firebase_credentials.json'
-    ]);
+        // Create Firebase instance using the decoded credentials
+        $factory = (new Factory)->withServiceAccount($credentialsArray);
+        $firebase = $factory->create();
+    } else {
+        $projectId = 'contracts-generator';
+        $firestore = new FirestoreClient([
+            'projectId' => $projectId,
+            'keyFilePath' => __DIR__ . '/../firebase_credentials.json'
+        ]);
+    }
 
     return $firestore;
 }
