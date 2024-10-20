@@ -35,7 +35,7 @@ function generateContractPDF($client, $contractTypes) {
     $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
     foreach($contractTypes as $contractType) {
-        $templatePath = __DIR__ . "/templates/{$contractType}.docx";
+        $templatePath = __DIR__ . "../templates/{$contractType}.docx";
         if (!file_exists($templatePath)) {
             echo "Template not found for contract type: $contractType";
             return;
@@ -77,7 +77,7 @@ function generateContractPDF($client, $contractTypes) {
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
     
         // Save the filled template as a temporary .docx file
-        $tempDocxPath = 'contracts/' . $client['nome'] . '_' . $contractType . '.docx';
+        $tempDocxPath = '../contracts/' . $client['nome'] . '_' . $contractType . '.docx';
         $templateProcessor->saveAs($tempDocxPath);
 
         // Convert the .docx file to PDF
@@ -164,7 +164,7 @@ function convertDocxToPDF2($docxFilePath, $fileName) {
 function convertDocxToPDF($docxFilePath, $fileName) {
     // Load the .docx file content
     $phpWord = \PhpOffice\PhpWord\IOFactory::load($docxFilePath);
-    $pdfFilePath = 'contracts/' . $fileName . '_' . time() . '.pdf';
+    $pdfFilePath = '../contracts/' . $fileName . '_' . time() . '.pdf';
 
     // Convert .docx content to HTML
     $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
@@ -230,7 +230,7 @@ function convertToWords($number)
 function uploadToGoogleDrive($filePath, $fileName, $folderId) {
     // Initialize the Google Client
     $client = new Google_Client();
-    $client->setAuthConfig('./google_credentials.json');
+    $client->setAuthConfig('../google_credentials.json');
     $client->addScope(Google_Service_Drive::DRIVE_FILE);
     $client->setAccessType('offline');
 
