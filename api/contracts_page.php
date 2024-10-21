@@ -112,7 +112,7 @@ function generateContractPDF($client, $contractTypes) {
         //}
     
         // Serve the DOCX file for download
-        if (count($contractTypes) > 1) {
+        /*if (count($contractTypes) > 1) {
             // Add the DOCX file to the ZIP archive
             $zip->addFileFromStream($client['nome'] . '_' . $contractType . '.docx', $tempMemoryFile);
         } else if (file_exists($tempDocxPath)) {
@@ -136,21 +136,17 @@ function generateContractPDF($client, $contractTypes) {
             /*fpassthru($tempMemoryFile);
 
             // Clean up and close the memory stream.
-            fclose($tempMemoryFile);*/
+            fclose($tempMemoryFile);
 
             exit();
         } else {
             echo "Error: Could not generate the contract for type: $contractType";
-        }
-
-        // Save the content to a temporary file in /tmp directory
-        /*$tempFilePath = '/tmp/' . $fileName . '.docx';
-        file_put_contents($tempFilePath, $docxContent);
+        }*/
 
         // Check if the file exists before proceeding
-        if (file_exists($tempFilePath)) {
+        if (file_exists($tempDocxPath)) {
             // Generate a download URL (you may need to adjust this depending on your setup)
-            $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempFilePath));
+            $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempDocxPath));
             
             // Redirect the user to the download URL
             header('Location: ' . $downloadUrl);
@@ -160,7 +156,7 @@ function generateContractPDF($client, $contractTypes) {
             echo "Error: Unable to generate the download file.";
         }
 
-        fclose($tempMemoryFile);*/
+        //fclose($tempMemoryFile);
     }
 
     // Close the ZIP archive
