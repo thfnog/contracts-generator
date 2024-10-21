@@ -31,9 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'generate') {
 $clients = getClients();
 
 function generateContractPDF($client, $contractTypes) {
-    $zip = new ZipArchive();
-    $zipFileName = __DIR__ . '/../contracts/' . $client['nome'] . '_contracts.zip';
-    $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    // create a new zipstream object
+    $zip = new ZipStream\ZipStream(
+        outputName: $client['nome'] . '_contracts.zip',
+        // enable output of HTTP headers
+        sendHttpHeaders: true,
+    );
 
     foreach($contractTypes as $contractType) {
         $templatePath = __DIR__ . "/../templates/{$contractType}.docx";
@@ -77,10 +80,21 @@ function generateContractPDF($client, $contractTypes) {
     
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
     
-        // Save the filled template as a temporary .docx file
-        $tempDocxPath = __DIR__ . '/../contracts/' . $client['nome'] . '_' . $contractType . '.docx';
-        $templateProcessor->saveAs($tempDocxPath);
+        // Capture the content of the processed template as a string.
+        ob_start();
+        $templateProcessor->saveAs('php://output');
+        $docxContent = ob_get_clean();
 
+        // Write the content into a memory stream.
+        $tempMemoryFile = fopen('php://memory', 'w+');
+        fwrite($tempMemoryFile, $docxContent);
+
+        // Rewind the memory pointer to the beginning of the file.
+        rewind($tempMemoryFile);
+
+        // Get the content length for the headers.
+        $contentLength = strlen($docxContent);
+        
         // Convert the .docx file to PDF
         $fileName = $client['nome'] . '_' . $contractType;
         $folderId = '1qt4re1dh9L6q0TpmSvQ4rJVeEGYIZQmB';
@@ -97,8 +111,8 @@ function generateContractPDF($client, $contractTypes) {
         // Serve the DOCX file for download
         if (count($contractTypes) > 1) {
             // Add the DOCX file to the ZIP archive
-            $zip->addFile($tempDocxPath, basename($tempDocxPath));
-        } else if (file_exists($tempDocxPath)) {
+            $zip->addFileFromStream($client['nome'] . '_' . $contractType . '.docx', $tempMemoryFile);
+        } else if (($tempMemoryFile)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             header('Content-Disposition: attachment; filename='.$fileName. '.docx');
@@ -106,41 +120,37 @@ function generateContractPDF($client, $contractTypes) {
             header('Expires: 0');
             header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             header('Pragma: public');
-            header('Content-Length: ' . filesize($tempDocxPath));
-            ob_clean();
-            flush();
-            readfile($tempDocxPath);
+            header('Content-Length: ' . $contentLength);
+            
+            // Output the content directly from memory.
+            fpassthru($tempMemoryFile);
 
-            // Delete the temporary .docx file
-            unlink($tempDocxPath);
+            // Clean up and close the memory stream.
+            fclose($tempMemoryFile);
 
             exit();
         } else {
             echo "Error: Could not generate the contract for type: $contractType";
         }
+
+        fclose($tempMemoryFile);
     }
 
     // Close the ZIP archive
-    $zip->close();
+    $contentLength = $zip->finish();
 
     // Serve the ZIP file for download
     if (count($contractTypes) > 1) {
-        if (file_exists($zipFileName)) {
-            header('Content-Type: application/zip');
-            header('Content-Disposition: attachment; filename=' . basename($zipFileName));
-            header('Content-Length: ' . filesize($zipFileName));
-            header('Pragma: public');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Expires: 0');
-            readfile($zipFileName);
-    
-            $mask = __DIR__ . '/../contracts/' . $client['nome'] . '_' . '*.*';
-            array_map('unlink', glob($mask));
-    
-            exit();
-        } else {
-            echo "Error: Could not create ZIP file.";
-        }        
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename=' . $client['nome'] . '_contracts.zip');
+        header('Content-Length: ' . $contentLength);
+        header('Pragma: public');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Expires: 0');
+
+        exit();       
+    } else {
+        echo "Error: Could not create ZIP file.";
     } 
     
 }

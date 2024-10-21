@@ -2,7 +2,6 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Google\Cloud\Firestore\FirestoreClient;
-
 /**
  * Initialize the Firestore Client.
  *
@@ -11,12 +10,18 @@ use Google\Cloud\Firestore\FirestoreClient;
 function initializeFirestoreClient(): FirestoreClient {
     $base64Credentials = getenv('FIREBASE_CREDENTIALS');
     if ($base64Credentials) {
-        $decodedCredentials = json_decode(base64_decode($base64Credentials), true);
+        error_log('Using env variable value');
+        $decodedCredentials = base64_decode($base64Credentials);
+        $credentialsArray = json_decode($decodedCredentials, true);
 
-        // Use $decodedCredentials as an array in your Firebase initialization.
-        $firebase = new FirestoreClient();
-        $firebase = $firebase->withArray($decodedCredentials);
+        // Create Firebase instance using the decoded credentials
+        $projectId = 'contracts-generator';
+        $firestore = new FirestoreClient([
+            'projectId' => $projectId,
+            'keyFile' => $credentialsArray,
+        ]);
     } else {
+        error_log('Using storaged file');
         $projectId = 'contracts-generator';
         $firestore = new FirestoreClient([
             'projectId' => $projectId,
@@ -26,6 +31,5 @@ function initializeFirestoreClient(): FirestoreClient {
 
     return $firestore;
 }
-
 
 ?>
