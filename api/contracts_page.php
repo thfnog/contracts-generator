@@ -118,8 +118,8 @@ function generateContractPDF($client, $contractTypes) {
             header('Content-Disposition: attachment; filename='.$fileName. '.docx');
             header('Content-Transfer-Encoding: binary');
             header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Pragma: public');
+            header('Cache-Control: private, no-transform, no-store, must-revalidate');
+            //header('Pragma: public');
             header('Content-Length: ' . $contentLength);
             
             // Output the content directly from memory.
@@ -413,8 +413,6 @@ function uploadToGoogleDrive($filePath, $fileName, $folderId) {
         iframe.src = form.action;
 
         document.body.appendChild(iframe);
-
-        window.open('/api/contracts_page', '_blank');
     });
 </script>
 </html>
