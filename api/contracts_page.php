@@ -149,8 +149,8 @@ function generateContractPDF($client, $contractTypes) {
             $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempDocxPath));
             
             // Redirect the user to the download URL
-            header('Location: ' . $downloadUrl);
-            //echo '<a href="' . $downloadUrl . '" download>Click here to download</a>';
+            //header('Location: ' . $downloadUrl);
+            echo '<a href="' . $downloadUrl . '" download>Click here to download</a>';
             exit();
         } else {
             echo "Error: Unable to generate the download file.";
