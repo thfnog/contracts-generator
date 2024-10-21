@@ -18,6 +18,7 @@
         "dompdf/dompdf": "^3.0",
         "kwn/number-to-words": "^2.10",
         "ncjoes/office-converter": "^1.0",
-        "google/apiclient": "^2.14"
+        "google/apiclient": "^2.14",
+        "maennchen/zipstream-php": "^3.1"
     }
 }
