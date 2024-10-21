@@ -19,7 +19,6 @@
         "kwn/number-to-words": "^2.10",
         "ncjoes/office-converter": "^1.0",
         "google/apiclient": "^2.14",
-        "vlucas/phpdotenv": "^5.6",
         "maennchen/zipstream-php": "^3.1"
     }
 }
