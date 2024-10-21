@@ -80,8 +80,11 @@ function generateContractPDF($client, $contractTypes) {
     
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
     
+        $tempDocxPath = '/tmp/' . $client['nome'] . '_' . $contractType . '.docx';
+        $templateProcessor->saveAs($tempDocxPath);
+
         // Capture the content of the processed template as a string.
-        ob_start();
+        /*ob_start();
         $templateProcessor->saveAs('php://output');
         $docxContent = ob_get_clean();
 
@@ -93,7 +96,7 @@ function generateContractPDF($client, $contractTypes) {
         rewind($tempMemoryFile);
 
         // Get the content length for the headers.
-        $contentLength = strlen($docxContent);
+        $contentLength = strlen($docxContent);*/
         
         // Convert the .docx file to PDF
         $fileName = $client['nome'] . '_' . $contractType;
@@ -109,10 +112,10 @@ function generateContractPDF($client, $contractTypes) {
         //}
     
         // Serve the DOCX file for download
-        /*if (count($contractTypes) > 1) {
+        if (count($contractTypes) > 1) {
             // Add the DOCX file to the ZIP archive
             $zip->addFileFromStream($client['nome'] . '_' . $contractType . '.docx', $tempMemoryFile);
-        } else if (($tempMemoryFile)) {
+        } else if (file_exists($tempDocxPath)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             header('Content-Disposition: attachment; filename='.$fileName. '.docx');
@@ -120,21 +123,28 @@ function generateContractPDF($client, $contractTypes) {
             header('Expires: 0');
             header('Cache-Control: private, no-transform, no-store, must-revalidate');
             header('Pragma: public');
-            header('Content-Length: ' . $contentLength);
+            header('Content-Length: ' . filesize($tempDocxPath));
+            
+            ob_clean();
+            flush();
+            readfile($tempDocxPath);
+
+            // Delete the temporary .docx file
+            unlink($tempDocxPath);
             
             // Output the content directly from memory.
-            fpassthru($tempMemoryFile);
+            /*fpassthru($tempMemoryFile);
 
             // Clean up and close the memory stream.
-            fclose($tempMemoryFile);
+            fclose($tempMemoryFile);*/
 
             exit();
         } else {
             echo "Error: Could not generate the contract for type: $contractType";
-        }*/
+        }
 
         // Save the content to a temporary file in /tmp directory
-        $tempFilePath = '/tmp/' . $fileName . '.docx';
+        /*$tempFilePath = '/tmp/' . $fileName . '.docx';
         file_put_contents($tempFilePath, $docxContent);
 
         // Check if the file exists before proceeding
@@ -150,7 +160,7 @@ function generateContractPDF($client, $contractTypes) {
             echo "Error: Unable to generate the download file.";
         }
 
-        fclose($tempMemoryFile);
+        fclose($tempMemoryFile);*/
     }
 
     // Close the ZIP archive
