@@ -413,6 +413,8 @@ function uploadToGoogleDrive($filePath, $fileName, $folderId) {
         iframe.src = form.action;
 
         document.body.appendChild(iframe);
+
+        window.open('/api/contracts_page', '_blank');
     });
 </script>
 </html>
