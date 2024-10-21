@@ -136,9 +136,28 @@ function generateContractPDF($client, $contractTypes) {
         // Save the content to a temporary file in /tmp directory
         $tempFilePath = '/tmp/' . $fileName . '.docx';
         file_put_contents($tempFilePath, $docxContent);
+        if (file_exists($tempFilePath)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            header('Content-Disposition: attachment; filename="' . $file . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($tempFilePath));
+            ob_clean();
+            flush();
+            
+            // Stream the file
+            readfile($tempFilePath);
+    
+            // Delete the temporary file after streaming it
+            unlink($tempFilePath);
+            exit();
+        }
 
         // Check if the file exists before proceeding
-        if (file_exists($tempFilePath)) {
+        /*if (file_exists($tempFilePath)) {
             // Generate a download URL (you may need to adjust this depending on your setup)
             $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempFilePath));
             
@@ -148,7 +167,7 @@ function generateContractPDF($client, $contractTypes) {
             exit();
         } else {
             echo "Error: Unable to generate the download file.";
-        }
+        }*/
 
         fclose($tempMemoryFile);
     }
