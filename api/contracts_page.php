@@ -101,7 +101,7 @@ function generateContractPDF($client, $contractTypes) {
         //convertDocxToPDF($tempDocxPath, $fileName);
 
         // Upload the DOCX file to Google Drive
-        //$fileId = uploadToGoogleDrive($tempDocxPath, $fileName, $folderId);
+        //$fileId = uploadToGoogleDrive($docxContent, $fileName, $folderId);
         //if ($fileId) {
         //    echo "Contract uploaded successfully: {$fileName} (ID: {$fileId})";
         //} else {
@@ -109,7 +109,7 @@ function generateContractPDF($client, $contractTypes) {
         //}
     
         // Serve the DOCX file for download
-        if (count($contractTypes) > 1) {
+        /*if (count($contractTypes) > 1) {
             // Add the DOCX file to the ZIP archive
             $zip->addFileFromStream($client['nome'] . '_' . $contractType . '.docx', $tempMemoryFile);
         } else if (($tempMemoryFile)) {
@@ -119,7 +119,7 @@ function generateContractPDF($client, $contractTypes) {
             header('Content-Transfer-Encoding: binary');
             header('Expires: 0');
             header('Cache-Control: private, no-transform, no-store, must-revalidate');
-            //header('Pragma: public');
+            header('Pragma: public');
             header('Content-Length: ' . $contentLength);
             
             // Output the content directly from memory.
@@ -131,6 +131,22 @@ function generateContractPDF($client, $contractTypes) {
             exit();
         } else {
             echo "Error: Could not generate the contract for type: $contractType";
+        }*/
+
+        // Save the content to a temporary file in /tmp directory
+        $tempFilePath = '/tmp/' . $fileName . '.docx';
+        file_put_contents($tempFilePath, $docxContent);
+
+        // Check if the file exists before proceeding
+        if (file_exists($tempFilePath)) {
+            // Generate a download URL (you may need to adjust this depending on your setup)
+            $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempFilePath));
+            
+            // Redirect the user to the download URL
+            header('Location: ' . $downloadUrl);
+            exit();
+        } else {
+            echo "Error: Unable to generate the download file.";
         }
 
         fclose($tempMemoryFile);
@@ -140,7 +156,7 @@ function generateContractPDF($client, $contractTypes) {
     $contentLength = $zip->finish();
 
     // Serve the ZIP file for download
-    if (count($contractTypes) > 1) {
+    /*if (count($contractTypes) > 1) {
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename=' . $client['nome'] . '_contracts.zip');
         header('Content-Length: ' . $contentLength);
@@ -151,7 +167,7 @@ function generateContractPDF($client, $contractTypes) {
         exit();       
     } else {
         echo "Error: Could not create ZIP file.";
-    } 
+    }*/ 
     
 }
 
@@ -238,7 +254,7 @@ function convertToWords($number)
     return $numberTransformer->toWords($number);
 }
 
-function uploadToGoogleDrive($filePath, $fileName, $folderId) {
+function uploadToGoogleDrive($content, $fileName, $folderId) {
     // Initialize the Google Client
     $client = new Google_Client();
     $client->setAuthConfig(__DIR__ . '/../google_credentials.json');
@@ -266,8 +282,6 @@ function uploadToGoogleDrive($filePath, $fileName, $folderId) {
         'name' => $fileName,
         'parents' => [$folderId]
     ]);
-
-    $content = file_get_contents($filePath);
 
     // Upload the file
     $file = $driveService->files->create($fileMetadata, [
@@ -398,7 +412,7 @@ function uploadToGoogleDrive($filePath, $fileName, $folderId) {
     </form>
 </body>
 
-<script>
+<!-- script>
     document.querySelector('form').addEventListener('submit', function (event) {
         const form = event.target;
 
@@ -414,6 +428,6 @@ function uploadToGoogleDrive($filePath, $fileName, $folderId) {
 
         document.body.appendChild(iframe);
     });
-</script>
+</script -->
 </html>
 
