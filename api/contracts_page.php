@@ -109,20 +109,18 @@ function generateContractPDF($client, $contractTypes) {
         //}
     
         // Serve the DOCX file for download
-        if (count($contractTypes) > 1) {
+        /*if (count($contractTypes) > 1) {
             // Add the DOCX file to the ZIP archive
             $zip->addFileFromStream($client['nome'] . '_' . $contractType . '.docx', $tempMemoryFile);
         } else if (($tempMemoryFile)) {
-            $base64Content = base64_encode($docxContent);
-
             header('Content-Description: File Transfer');
             header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-            header('Content-Disposition: attachment; filename=' . $fileName. '.docx');
+            header('Content-Disposition: attachment; filename='.$fileName. '.docx');
             header('Content-Transfer-Encoding: binary');
             header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Cache-Control: private, no-transform, no-store, must-revalidate');
             header('Pragma: public');
-            header('Content-Length: ' . strlen($base64Content));
+            header('Content-Length: ' . $contentLength);
             
             // Output the content directly from memory.
             fpassthru($tempMemoryFile);
@@ -133,10 +131,10 @@ function generateContractPDF($client, $contractTypes) {
             exit();
         } else {
             echo "Error: Could not generate the contract for type: $contractType";
-        }
+        }*/
 
         // Save the content to a temporary file in /tmp directory
-        /*$tempFilePath = '/tmp/' . $fileName . '.docx';
+        $tempFilePath = '/tmp/' . $fileName . '.docx';
         file_put_contents($tempFilePath, $docxContent);
 
         // Check if the file exists before proceeding
@@ -145,12 +143,12 @@ function generateContractPDF($client, $contractTypes) {
             $downloadUrl = '/api/download.php?file=' . urlencode(basename($tempFilePath));
             
             // Redirect the user to the download URL
-            //header('Location: ' . $downloadUrl);
-            echo '<a href="' . $downloadUrl . '" download>Click here to download</a>';
+            header('Location: ' . $downloadUrl);
+            //echo '<a href="' . $downloadUrl . '" download>Click here to download</a>';
             exit();
         } else {
             echo "Error: Unable to generate the download file.";
-        }*/
+        }
 
         fclose($tempMemoryFile);
     }
