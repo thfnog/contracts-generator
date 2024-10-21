@@ -6,8 +6,11 @@ if (isset($_GET['file'])) {
     if (file_exists($tempFilePath)) {
         header('Content-Description: File Transfer');
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: attachment; filename="' . $file . '"');
+        header('Content-Disposition: attachment/inline; filename="' . $file . '"');
         header('Content-Transfer-Encoding: binary');
+        header('content-security-policy: default-src "none"');
+        header('x-frame-options: DENY');
+        header('x-content-type-options: nosniff');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');

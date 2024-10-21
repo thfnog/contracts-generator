@@ -161,20 +161,6 @@ function generateContractPDF($client, $contractTypes) {
 
     // Close the ZIP archive
     $contentLength = $zip->finish();
-
-    // Serve the ZIP file for download
-    /*if (count($contractTypes) > 1) {
-        header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename=' . $client['nome'] . '_contracts.zip');
-        header('Content-Length: ' . $contentLength);
-        header('Pragma: public');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Expires: 0');
-
-        exit();       
-    } else {
-        echo "Error: Could not create ZIP file.";
-    }*/ 
     
 }
 
