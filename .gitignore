@@ -2,4 +2,3 @@ firebase_credentials.json
 google_credentials.json
 .env.local
 vendor/*
-composer.lock
