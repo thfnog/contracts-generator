@@ -10,7 +10,7 @@ use Google\Cloud\Firestore\FirestoreClient;
 function initializeFirestoreClient(): FirestoreClient {
     $base64Credentials = getenv('FIREBASE_CREDENTIALS');
     if ($base64Credentials) {
-        error_log('Using env variable value');
+        error_log('[firebase] Using env variable value');
         $decodedCredentials = base64_decode($base64Credentials);
         $credentialsArray = json_decode($decodedCredentials, true);
 
@@ -21,7 +21,7 @@ function initializeFirestoreClient(): FirestoreClient {
             'keyFile' => $credentialsArray,
         ]);
     } else {
-        error_log('Using storaged file');
+        error_log('[firebase] Using storaged file');
         $projectId = 'contracts-generator';
         $firestore = new FirestoreClient([
             'projectId' => $projectId,
