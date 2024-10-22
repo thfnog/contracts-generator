@@ -11,6 +11,7 @@ use NumberToWords\NumberToWords;
 
 date_default_timezone_set("America/Sao_Paulo");
 setlocale(LC_ALL, 'pt_BR.UTF-8');
+error_reporting(0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'generate') {
     $clientId = $_POST['client_id'] ?? '';
