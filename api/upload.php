@@ -59,7 +59,10 @@ function initGoogleServiceClient() {
     } else {
         // Redirect the user to Google's OAuth 2.0 server for consent
         $authUrl = $googleClient->createAuthUrl();
-        header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+        //header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+        ob_end_clean(); // remove previous echoed data
+        echo '<script>window.onload = function() { window.location.replace("' . filter_var($authUrl, FILTER_SANITIZE_URL) . '"); }</script>';
+        die; // nothing else to do
     }
 
     return $driveService;
