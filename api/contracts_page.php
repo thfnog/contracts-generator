@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <small>Use Ctrl para selecionar multiplas opções</small>
 
         <label for="description">Descrição do contrato:</label>
-        <textarea name="description" id="description" rows="4" required></textarea>
+        <textarea name="description" id="description" rows="4" required placeholder="O presente instrumento tem como objeto propor..."></textarea>
 
         <label for="amount">Valor Total:</label>
         <input type="number" name="amount" id="amount" placeholder="Digite o total" step="0.01">

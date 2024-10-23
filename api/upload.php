@@ -25,6 +25,7 @@ function generateContract($client, $contractTypes) {
         $amount = $_POST['amount'] ?? 1;
         $installments = $_POST['installments'] ?? 1;
         $firstInstallmentDate = $_POST['first_installment_date'];
+        //$percentual = $_POST['percentual'] ?? 1;
     
         // Load the .docx template
         $templateProcessor = new TemplateProcessor($templatePath);
@@ -33,7 +34,6 @@ function generateContract($client, $contractTypes) {
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
         $templateProcessor->setValue('{{cpf}}', htmlspecialchars($client['cpf']));
         $templateProcessor->setValue('{{rg}}', htmlspecialchars($client['rg']));
-        $templateProcessor->setValue('{{doc_emissao}}', htmlspecialchars($client['doc_emissao']));
         $templateProcessor->setValue('{{logradouro}}', htmlspecialchars($client['logradouro']));
         $templateProcessor->setValue('{{numero}}', htmlspecialchars($client['numero']));
         $templateProcessor->setValue('{{complemento}}', htmlspecialchars($client['complemento']));
@@ -52,6 +52,8 @@ function generateContract($client, $contractTypes) {
             $templateProcessor->setValue('{{desc_valor_total}}', convertToWordsWithCurrency($amount));
             $templateProcessor->setValue('{{desc_numero_parcelas}}', convertToWords($installments));
             $templateProcessor->setValue('{{desc_valor_parcelas}}', convertToWordsWithCurrency(($amount / $installments)));
+
+            //$templateProcessor->setValue('{{percentual}}', $percentual);
         }
     
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));

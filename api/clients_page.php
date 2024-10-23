@@ -175,43 +175,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="hidden" name="action" value="create">
 
         <!-- Name: Allows letters, spaces, and accented characters -->
-        <input type="text" name="nome" placeholder="Nome" required pattern="[A-Za-zÀ-ÿ\s]+" title="Use only letters and spaces.">
+        <input type="text" name="nome" placeholder="Nome" required pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras.">
 
         <!-- Email: Basic email pattern -->
-        <input type="email" name="email" placeholder="Email" required>
+        <input type="email" name="email" placeholder="Email">
 
         <!-- Phone: Brazilian phone format (with or without area code) -->
-        <input type="text" name="telefone" class="form-control" placeholder="Telefone" required pattern="(\(?\d{2}\)?\s?)?(\d{4,5}\-\d{4})" title="Format: (XX) XXXXX-XXXX or XXXXX-XXXX">
+        <input type="text" name="telefone" class="form-control" placeholder="Telefone" required>
 
         <!-- CPF: 11 digits with optional formatting (###.###.###-##) -->
-        <input type="text" name="cpf" placeholder="CPF" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11}" title="Use 11 digits, e.g., 123.456.789-10 or 12345678910">
+        <input type="text" name="cpf" placeholder="CPF" required >
 
         <!-- RG: Alphanumeric characters, typically 7-14 characters -->
-        <input type="text" name="rg" placeholder="RG" required pattern="[0-9a-zA-Z]{7,14}" title="Use between 7 and 14 alphanumeric characters.">
-
-        <!-- Emission Document: Free text (can be letters and spaces) -->
-        <input type="text" name="doc_emissao" placeholder="Emissão" required pattern="[A-Za-zÀ-ÿ\s]+" title="Use only letters and spaces.">
+        <input type="text" name="rg" placeholder="RG" required>
 
         <!-- Address: Free text, allowing letters, numbers, and spaces -->
-        <input type="text" name="logradouro" placeholder="Logradouro" required pattern="[A-Za-zÀ-ÿ0-9\s]+" title="Use letters, numbers, and spaces.">
+        <input type="text" name="logradouro" placeholder="Logradouro" required>
         
         <!-- Number: Numeric value, allowing up to 5 digits -->
-        <input type="text" name="numero" placeholder="Numero" required pattern="\d{1,5}" title="Use numbers only, up to 5 digits.">
+        <input type="text" name="numero" placeholder="Numero" required >
 
         <!-- Neighborhood: Allows letters and spaces -->
-        <input type="text" name="bairro" placeholder="Bairro" required pattern="[A-Za-zÀ-ÿ\s]+" title="Use only letters and spaces.">
+        <input type="text" name="bairro" placeholder="Bairro" required>
 
         <!-- Complement: Optional field, free text -->
-        <input type="text" name="complemento" placeholder="Complemento" pattern="[A-Za-zÀ-ÿ0-9\s]*" title="Use letters, numbers, and spaces.">
+        <input type="text" name="complemento" placeholder="Complemento">
 
         <!-- City: Allows letters and spaces -->
-        <input type="text" name="cidade" placeholder="Cidade" required pattern="[A-Za-zÀ-ÿ\s]+" title="Use only letters and spaces.">
+        <input type="text" name="cidade" placeholder="Cidade" required>
 
         <!-- State: Abbreviated format (e.g., SP, RJ), 2 uppercase letters -->
-        <input type="text" name="estado" placeholder="Estado" required pattern="[A-Z]{2}" title="Use 2 uppercase letters. e.g., SP, RJ">
+        <input type="text" name="estado" placeholder="Estado" required>
 
         <!-- CEP: Brazilian postal code format (#####-###) -->
-        <input type="text" name="cep" placeholder="CEP" required pattern="\d{5}-\d{3}|\d{8}" title="Use 8 digits, e.g., 12345-678 or 12345678">
+        <input type="text" name="cep" placeholder="CEP" required pattern="\d{5}-\d{3}|\d{8}" title="Use 8 digitos, e.g., 12345-678 or 12345678">
 
         <button type="submit">Adicionar Cliente</button>
     </form>
@@ -246,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         document.body.appendChild(iframe);
     });
-    
+
     function showLoading() {
         document.getElementById('loading-overlay').style.display = 'flex';
     }
