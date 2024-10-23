@@ -103,9 +103,9 @@ function generateContract($client, $contractTypes, $driveService) {
     
         $templateProcessor->setValue('{{tipo_contrato}}', $description);
         if (is_numeric($amount) || is_numeric($installments)) {
-            $templateProcessor->setValue('{{valor_total}}', $amount);
+            $templateProcessor->setValue('{{valor_total}}', number_format($amount, 2, ',', ''));
             $templateProcessor->setValue('{{numero_parcelas}}', $installments);
-            $templateProcessor->setValue('{{valor_parcelas}}', ($amount / $installments));
+            $templateProcessor->setValue('{{valor_parcelas}}', number_format(($amount / $installments), 2, ',', ''));
             $templateProcessor->setValue('{{data_primeira_parcela}}', date('d/m/Y', strtotime($firstInstallmentDate)));
         
             $templateProcessor->setValue('{{desc_valor_total}}', convertToWordsWithCurrency($amount));
@@ -250,16 +250,15 @@ function convertToWordsWithCurrency($number)
     // Convert integer part to words
     $integerWords = $numberTransformer->toWords($integerPart);
 
-    // Convert decimal part to words, if it exists
-    $decimalWords = '';
-    if ($decimalPart > 0) {
-        $decimalWords = $numberTransformer->toWords($decimalPart);
-    }
+    // Convert decimal part to words
+    $decimalWords = $numberTransformer->toWords($decimalPart);
 
     // Construct the final string with currency notation
     $result = ucfirst($integerWords) . ' reais';
     if (!empty($decimalWords)) {
         $result .= ' e ' . $decimalWords . ' centavos';
+    } else {
+        $result .= ' e zero centavos';
     }
 
     return $result;
