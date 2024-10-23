@@ -59,9 +59,10 @@ function initGoogleServiceClient() {
     } else {
         // Redirect the user to Google's OAuth 2.0 server for consent
         $authUrl = $googleClient->createAuthUrl();
+        error_log($authUrl);
         //header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
         ob_end_clean(); // remove previous echoed data
-        echo '<script>window.onload = function() { window.location.replace("' . filter_var($authUrl, FILTER_SANITIZE_URL) . '"); }</script>';
+        echo '<script>window.onload = function() { window.open("' . filter_var($authUrl, FILTER_SANITIZE_URL) . '", "_blank"); }</script>';
         die; // nothing else to do
     }
 
