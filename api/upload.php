@@ -7,35 +7,9 @@ use PhpOffice\PhpWord\TemplateProcessor;
 use NcJoes\OfficeConverter\OfficeConverter;
 use NumberToWords\NumberToWords;
 
-header('Content-Type: application/json');
 date_default_timezone_set("America/Sao_Paulo");
 setlocale(LC_ALL, 'pt_BR.UTF-8');
 error_reporting(0);
-
-$response = null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $clientId = $_POST['client_id'] ?? '';
-    $contractTypes = $_POST['contract_type'] ?? [];
-    
-    if ($clientId && $contractTypes) {
-        try {
-            $clients = getClients();
-            $client = $clients[$clientId] ?? null;
-            $clientName = $client['nome'];
-
-            $response = generateContract($client, $contractTypes);
-            $response['status'] = 'success';
-        } catch (Exception $e) {
-            $response = ['status' => 'error', 'message' => $e->getMessage()];
-            error_log("Erro:" . $e->getMessage());
-        }
-    }
-
-    // Return a JSON response
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
-}
 
 function generateContract($client, $contractTypes) {
     $clientFolder = '';

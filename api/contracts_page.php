@@ -1,13 +1,41 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
 
-include 'client_manager.php';
+include 'upload.php';
 
 date_default_timezone_set("America/Sao_Paulo");
 setlocale(LC_ALL, 'pt_BR.UTF-8');
 error_reporting(0);
 
 $clients = getClients();
+
+uasort($clients, function($a, $b) {
+    return strcmp($a['nome'], $b['nome']);
+});
+
+$response = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $clientId = $_POST['client_id'] ?? '';
+    $contractTypes = $_POST['contract_type'] ?? [];
+    
+    if ($clientId && $contractTypes) {
+        try {
+            $clients = getClients();
+            $client = $clients[$clientId] ?? null;
+            $clientName = $client['nome'];
+
+            $response = generateContract($client, $contractTypes);
+            $response['status'] = 'success';
+        } catch (Exception $e) {
+            $response = ['status' => 'error', 'message' => $e->getMessage()];
+            error_log("Erro:" . $e->getMessage());
+        }
+    }
+
+    // Return a JSON response
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
+}
 
 ?>
 
@@ -123,9 +151,7 @@ $clients = getClients();
         <p>Gerando contrato(s)...</p>
     </div>
 
-    <a href="index.php" class="button">Voltar</a>
-
-    <form id="uploadForm" onsubmit="event.preventDefault(); uploadFile();>
+    <form id="uploadForm" onsubmit="event.preventDefault();">
         <input type="hidden" name="action" value="generate">
 
         <label for="client_id">Selecione o Cliente:</label>
@@ -134,6 +160,7 @@ $clients = getClients();
                 <option value="<?= htmlspecialchars($uid) ?>"><?= htmlspecialchars($client['nome']) ?></option>
             <?php endforeach; ?>
         </select>
+        <a href="clients_page.php" class="button">Gerir Clientes</a>
 
         <label for="contract_type">Tipos de Contrato:</label>
         <select name="contract_type[]" multiple required>
@@ -192,7 +219,7 @@ $clients = getClients();
 
         try {
             const formData = new FormData(document.getElementById('uploadForm'));
-            const response = await fetch("upload.php", {
+            const response = await fetch("contracts_page.php", {
                 method: 'POST',
                 body: formData
             });

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
 
 include 'firebase.php';
 
@@ -25,27 +26,39 @@ function getClients(): array {
 /**
  * Add a new user to the Firestore database.
  */
-function addUser(array $data): void {
+function addUser(array $data) {
     $firestore = initializeFirestoreClient();
     $collection = $firestore->collection('clients');
 
+    // Query to check if a user with the same nome and cpf exists
+    $queryByCpf = $collection->where('cpf', '=', $data['cpf'])->documents();
+
+    // Check if any documents were returned by the query
+    if (!$queryByCpf->isEmpty()) {
+        throw new Exception('Usuário com mesmo CPF já existe.');
+    }
+
     $newUserRef = $collection->newDocument();
     $newUserRef->set([
-        'nome' => $_POST['nome'],
-        'email' => $_POST['email'],
-        'telefone' => $_POST['telefone'],
-        'cpf' => $_POST['cpf'],
-        'rg' => $_POST['rg'],
-        'logradouro' => $_POST['logradouro'],
-        'numero' => $_POST['numero'],
-        'bairro' => $_POST['bairro'],
-        'complemento' => $_POST['complemento'],
-        'cidade' => $_POST['cidade'],
-        'estado' => $_POST['estado'],
-        'cep' => $_POST['cep'],
+        'nome' => $data['nome'],
+        'email' => $data['email'],
+        'telefone' => $data['telefone'],
+        'cpf' => $data['cpf'],
+        'rg' => $data['rg'],
+        'logradouro' => $data['logradouro'],
+        'numero' => $data['numero'],
+        'bairro' => $data['bairro'],
+        'complemento' => $data['complemento'],
+        'cidade' => $data['cidade'],
+        'estado' => $data['estado'],
+        'cep' => $data['cep'],
     ]);
 
-    echo "User added with ID: " . $newUserRef->id();
+    $snapshot = $newUserRef->snapshot();
+
+    return [
+        'name' => $snapshot['nome']
+    ];
 }
 
 /**
@@ -53,30 +66,37 @@ function addUser(array $data): void {
  *
  * @param string $userId
  * @param array $data
- * @return void
+ * @return array
  */
-function updateUser(string $userId, array $data): void {
+function updateUser(string $userId, array $data) {
     $firestore = initializeFirestoreClient();
     $userRef = $firestore->collection('clients')->document($userId);
 
     $userRef->set($data, ['merge' => true]);
+    $snapshot = $userRef->snapshot();
 
-    echo "User updated with ID: $userId";
+    return [
+        'name' => $snapshot['nome']
+    ];
 }
 
 /**
  * Delete a user from the Firestore database.
  *
  * @param string $userId
- * @return void
+ * @return array
  */
-function deleteUser(string $userId): void {
+function deleteUser(string $userId) {
     $firestore = initializeFirestoreClient();
     $userRef = $firestore->collection('clients')->document($userId);
+    $snapshot = $userRef->snapshot();
+    $name = $snapshot['nome'];
 
-    $userRef->delete();
+    $userRef->delete();    
 
-    echo "User deleted with ID: $userId";
+    return [
+        'name' => $name
+    ];
 }
 
 ?>
