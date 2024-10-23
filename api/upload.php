@@ -89,6 +89,7 @@ function generateContract($client, $contractTypes, $driveService) {
         $templateProcessor = new TemplateProcessor($templatePath);
     
         // Replace placeholders with client data
+        $templateProcessor->setValue('{{currency}}', htmlspecialchars("R$"));
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
         $templateProcessor->setValue('{{cpf}}', htmlspecialchars($client['cpf']));
         $templateProcessor->setValue('{{rg}}', htmlspecialchars($client['rg']));
