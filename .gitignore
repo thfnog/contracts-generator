@@ -2,3 +2,6 @@ firebase_credentials.json
 google_credentials.json
 .env.local
 vendor/*
+google_leticia_credentials.json
+oauth_google_credentials.json
+oauth_google_leticia_credentials.json

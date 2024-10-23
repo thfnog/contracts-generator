@@ -6,6 +6,7 @@ date_default_timezone_set("America/Sao_Paulo");
 setlocale(LC_ALL, 'pt_BR.UTF-8');
 error_reporting(0);
 
+$driveService = DriveServiceSingleton::getInstance();
 $clients = getClients();
 
 uasort($clients, function($a, $b) {
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $client = $clients[$clientId] ?? null;
             $clientName = $client['nome'];
 
-            $response = generateContract($client, $contractTypes);
+            $response = generateContract($client, $contractTypes, $driveService);
             $response['status'] = 'success';
         } catch (Exception $e) {
             $response = ['status' => 'error', 'message' => $e->getMessage()];

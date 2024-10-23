@@ -11,7 +11,61 @@ date_default_timezone_set("America/Sao_Paulo");
 setlocale(LC_ALL, 'pt_BR.UTF-8');
 error_reporting(0);
 
-function generateContract($client, $contractTypes) {
+class DriveServiceSingleton {
+    private static $driveService = null;
+
+    public static function getInstance() {
+        if (self::$driveService === null) {
+            self::$driveService = initGoogleServiceClient();
+        }
+
+        return self::$driveService;
+    }
+}
+
+function initGoogleServiceClient() {
+    // Start a session to store the OAuth 2.0 tokens
+    session_start();
+
+    // Create the Google Client object
+    $googleClient = new Google\Client();
+
+    $base64Credentials = getenv('GOOGLE_CREDENTIALS');
+    if ($base64Credentials) {
+        error_log('[google] Using env variable value');
+        // Decode the base64-encoded credentials and convert them into an associative array
+        $decodedCredentials = json_decode(base64_decode($base64Credentials), true);
+
+        // Use the associative array for authentication
+        $googleClient->setAuthConfig($decodedCredentials);
+    } else {
+        error_log('[google] Using storaged file');
+        $googleClient->setAuthConfig(__DIR__ . '/../oauth_google_credentials.json');
+    }
+    
+    $serverUrlBase = getenv('SERVER_URL_BASE', true) ?: 'http://localhost:3000/api';
+    $googleClient->setRedirectUri("$serverUrlBase/oauth2callback.php");
+    $googleClient->addScope(Google\Service\Drive::DRIVE);
+    $googleClient->setAccessType('offline'); // For getting a refresh token
+    $googleClient->setPrompt('consent'); // Ensures that the consent screen is shown each time
+
+    // Check if we have an access token
+    if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+        // Set the access token in the client
+        $googleClient->setAccessToken($_SESSION['access_token']);
+
+        // Initialize the Google Drive service
+        $driveService = new Google_Service_Drive($googleClient);
+    } else {
+        // Redirect the user to Google's OAuth 2.0 server for consent
+        $authUrl = $googleClient->createAuthUrl();
+        header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+    }
+
+    return $driveService;
+}
+
+function generateContract($client, $contractTypes, $driveService) {
     $clientFolder = '';
     $clientName = $client['nome'];
     foreach($contractTypes as $contractType) {
@@ -73,7 +127,7 @@ function generateContract($client, $contractTypes) {
         $fileName = $clientName . '_' . $contractType;
 
         // Upload the DOCX file to Google Drive
-        $clientFolder = uploadToGoogleDrive($docxContent, $fileName, $clientName);
+        $clientFolder = uploadToGoogleDrive($docxContent, $fileName, $clientName, $driveService);
 
         fclose($tempMemoryFile);
     }
@@ -85,26 +139,7 @@ function generateContract($client, $contractTypes) {
     
 }
 
-function uploadToGoogleDrive($content, $fileName, $folderName) {
-    // Initialize the Google Client with Service Account credentials
-    $client = new Google_Client();
-    $client->addScope(Google_Service_Drive::DRIVE_FILE);
-    $client->setAccessType('offline');
-
-    // Initialize the Google Drive service
-    $driveService = new Google_Service_Drive($client);
-    $base64Credentials = getenv('GOOGLE_CREDENTIALS');
-    if ($base64Credentials) {
-        error_log('[google] Using env variable value');
-        $decodedCredentials = base64_decode($base64Credentials);
-        $googleCredential = json_decode($decodedCredentials, true);
-
-        $client->setAuthConfig($googleCredential);
-    } else {
-        error_log('[google] Using storaged file');
-        $client->setAuthConfig(__DIR__ . '/../google_credentials.json');
-    }    
-
+function uploadToGoogleDrive($content, $fileName, $folderName, $driveService) {
     // Create or get the folder ID
     $parentId = getenv('ROOT_FOLDER_ID', true) ?: '1K_5McW3E4ryJn_zTrYSVYPv7ZF0SevoX';
 
@@ -141,17 +176,10 @@ function uploadToGoogleDrive($content, $fileName, $folderName) {
             'uploadType' => 'multipart',
             'fields' => 'id, webViewLink'
         ]);
-    
+
         // Get the file ID
         $fileId = $file->id;
     }
-
-    // Make the file accessible to the specified user
-    $driveService->permissions->create($fileId, new Google_Service_Drive_Permission([
-        'type' => 'user',
-        'role' => 'writer',
-        'emailAddress' => getenv('EMAIL_SHARE', true) ?: 'thfnog@gmail.com'
-    ]));
 
     return $innerFolderId;
 }
