@@ -82,9 +82,9 @@ function generateContract($client, $contractTypes, $driveService) {
         $description = $_POST['description'];
         $amount = $_POST['amount'] ?? 1;
         $installments = $_POST['installments'] ?? 1;
-        $firstInstallmentDate = $_POST['first_installment_date'];
-        //$percentual = $_POST['percentual'] ?? 1;
-    
+        $dueDate = $_POST['due_date'];
+        $percentageOfSuccess = is_numeric($_POST['percentage_of_success']) ? $_POST['percentage_of_success'] : 30;
+        
         // Load the .docx template
         $templateProcessor = new TemplateProcessor($templatePath);
     
@@ -93,29 +93,42 @@ function generateContract($client, $contractTypes, $driveService) {
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
         $templateProcessor->setValue('{{cpf}}', htmlspecialchars($client['cpf']));
         $templateProcessor->setValue('{{rg}}', htmlspecialchars($client['rg']));
+        
         $templateProcessor->setValue('{{logradouro}}', htmlspecialchars($client['logradouro']));
         $templateProcessor->setValue('{{numero}}', htmlspecialchars($client['numero']));
         $templateProcessor->setValue('{{complemento}}', htmlspecialchars($client['complemento']));
         $templateProcessor->setValue('{{bairro}}', htmlspecialchars($client['bairro']));
         $templateProcessor->setValue('{{cidade}}', htmlspecialchars($client['cidade']));
         $templateProcessor->setValue('{{estado}}', htmlspecialchars($client['estado']));
-        $templateProcessor->setValue('{{cep}}', htmlspecialchars($client['cep']));
-    
-        $templateProcessor->setValue('{{tipo_contrato}}', $description);
-        if (is_numeric($amount) || is_numeric($installments)) {
-            $templateProcessor->setValue('{{valor_total}}', number_format($amount, 2, ',', ''));
-            $templateProcessor->setValue('{{numero_parcelas}}', $installments);
-            $templateProcessor->setValue('{{valor_parcelas}}', number_format(($amount / $installments), 2, ',', ''));
-            $templateProcessor->setValue('{{data_primeira_parcela}}', date('d/m/Y', strtotime($firstInstallmentDate)));
+        $templateProcessor->setValue('{{cep}}', htmlspecialchars($client['cep']));    
         
-            $templateProcessor->setValue('{{desc_valor_total}}', convertToWordsWithCurrency($amount));
-            $templateProcessor->setValue('{{desc_numero_parcelas}}', convertToWords($installments));
-            $templateProcessor->setValue('{{desc_valor_parcelas}}', convertToWordsWithCurrency(($amount / $installments)));
-
-            //$templateProcessor->setValue('{{percentual}}', $percentual);
-        }
-    
+        $templateProcessor->setValue('{{tipo_contrato}}', $description);
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
+
+        $textTotalValue = '';
+        $dueDate = date('d/m/Y', strtotime($dueDate));
+        if (is_numeric($amount)) {
+            $totalValue = number_format($amount, 2, ',', '');
+            $descTotalValue = convertToWordsWithCurrency($amount);
+            $textTotalValue = "R$ $totalValue ($descTotalValue) ";
+        }     
+        
+        if (is_numeric($installments)) {
+            $descNumberInstallments = convertToWords($installments);
+            $installmentsValue = number_format(($amount / $installments), 2, ',', '');
+            $descInstallmentsValue = convertToWordsWithCurrency(($amount / $installments));
+            $textInstallment = "divididos em $installments ($descNumberInstallments) parcela(s) mensais no valor de R$ $installmentsValue ($descInstallmentsValue), sendo a primeira para o dia $dueDate e as demais para o mesmo dia dos meses subsequentes";
+            
+            $templateProcessor->setValue('{{parcelas}}', $textInstallment);
+        } else {
+            $textTotalValue .= " com vencimento no dia $dueDate";
+            $templateProcessor->setValue('{{parcelas}}', "");
+        }
+
+        $templateProcessor->setValue('{{remuneracao}}', $textTotalValue);
+
+        $descValueOfSuccess = convertToWords($percentageOfSuccess);
+        $templateProcessor->setValue('{{percentual_ganho}}', "+ $percentageOfSuccess% ($descValueOfSuccess por cento) do valor do êxito");
     
         // Capture the content of the processed template as a string.
         ob_start();

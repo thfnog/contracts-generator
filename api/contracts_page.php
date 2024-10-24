@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="clients_page.php" class="button">Gerir Clientes</a>
 
         <label for="contract_type">Tipos de Contrato:</label>
-        <select name="contract_type[]" multiple required>
+        <select id="contract_type" name="contract_type[]" multiple required>
             <option value="honorarios">Honorários</option>
             <option value="honorarios_valor">Honorários Com Valor</option>
             <option value="procuracao">Procuração</option>
@@ -175,34 +175,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="description">Descrição do contrato:</label>
         <textarea name="description" id="description" rows="4" required placeholder="O presente instrumento tem como objeto propor..."></textarea>
 
-        <label for="amount">Valor Total:</label>
-        <input type="number" name="amount" id="amount" placeholder="Digite o total" step="0.01">
+        <div id="additionalFields" style="display: none;">
+            <label for="amount">Valor Total:</label>
+            <input type="number" name="amount" id="amount" placeholder="Digite o total" step="0.01">
 
-        <label for="installments">Quantidade de parcelas:</label>
-        <input type="number" name="installments" id="installments" placeholder="Digite a quantidade de parcelas" step="1">
+            <label for="installments">Quantidade de parcelas:</label>
+            <input type="number" name="installments" id="installments" placeholder="Digite a quantidade de parcelas" step="1">
 
-        <label for="first_installment_date">Data primeira parcela:</label>
-        <input type="date" name="first_installment_date" id="first_installment_date">
+            <label for="due_date">Data de vencimento / primeira parcela:</label>
+            <input type="date" name="due_date" id="due_date">
+
+            <label for="percentage_of_success">Percentual do êxito:</label>
+            <input type="number" name="percentage_of_success" id="percentage_of_success" placeholder="Digite o valor do êxito sobre o ganho" step="1">
+        </div>
 
         <button type="submit">Gerar Contrato</button>
     </form>
 </body>
 
 <script>
-    document.querySelector('form').addEventListener('submit', function (event) {
-        const form = event.target;
+    const contractTypeSelect = document.getElementById('contract_type');
+    const amountInput = document.getElementById('amount');
+    const dueDateInput = document.getElementById('due_date');
+    const additionalFields = document.getElementById('additionalFields');
 
-        // Create an invisible iframe to start the file download.
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.onload = function () {
-            // Once the iframe loads (file download starts), reset the form.
-            form.reset();
-        };
-        // Set the iframe source to the form's action (where the download happens).
-        iframe.src = form.action;
+    contractTypeSelect.addEventListener('change', function() {
+        const selectedValues = Array.from(contractTypeSelect.selectedOptions).map(option => option.value);
 
-        document.body.appendChild(iframe);
+        // Check if "honorarios_valor" is among the selected values
+        if (selectedValues.includes('honorarios_valor')) {
+            additionalFields.style.display = 'block';
+        } else {
+            additionalFields.style.display = 'none';
+        }
+
+        if (selectedValues.includes('honorarios_valor')) {
+            amountInput.required = true;
+        } else {
+            amountInput.required = false;
+        }
+    });
+
+    amountInput.addEventListener('input', function() {
+        if (amountInput.value) {
+            dueDateInput.required = true;
+        } else {
+            dueDateInput.required = false;
+        }
     });
 
     function showLoading() {
@@ -214,6 +233,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        const selectedValues = Array.from(contractTypeSelect.selectedOptions).map(option => option.value);
+
+        if (selectedValues.includes('honorarios_valor') && !amountInput.value) {
+            alert('Campo de Valor Total é obrigátorio.');
+        }
+
+        if (amountInput.value && !dueDateInput.value) {
+            alert('Campo de Data de Vencimento é obrigátorio.');
+        }
+
         event.preventDefault(); // Prevent the default form submission
 
         showLoading();
@@ -227,6 +256,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const result = await response.json();
 
             if (result.status === 'success') {
+                event.target.reset();
+                additionalFields.style.display = 'none';
                 alert('Contrato(s) criado com sucesso na pasta: ' + result.clientName);
                 window.open(result.folderUrl, '_blank');
             } else {
