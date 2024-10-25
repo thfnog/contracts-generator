@@ -92,11 +92,16 @@ function generateContract($client, $contractTypes, $driveService) {
         // Replace placeholders with client data
         $templateProcessor->setValue('{{currency}}', htmlspecialchars("R$"));
 
+        $cpf = $client['cpf'];
+        if (isset($cpf)) {
+            $rg = $client['rg'];
+            $pessoaFisicaText = "pessoa natural, brasileira, portadora da Cédula de Identidade RG nº $cpf, inscrito no CPF/MF sob o nº $rg, residente e domiciliado à";
+            $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaFisicaText));
+        } else if (isset($cnpj)) {
+            $pessoaJuridicaText = "pessoa jurídica de direito privado, devidamente inscrita no CNPJ/MF sob n° $cnpj, com sede na";
+            $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaJuridicaText));
+        }
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
-        $templateProcessor->setValue('{{cpf}}', htmlspecialchars($client['cpf']));
-        $templateProcessor->setValue('{{rg}}', htmlspecialchars($client['rg']));
-
-        $templateProcessor->setValue('{{cnpj}}', htmlspecialchars($cnpj));
         
         $templateProcessor->setValue('{{logradouro}}', htmlspecialchars($client['logradouro']));
         $templateProcessor->setValue('{{numero}}', htmlspecialchars($client['numero']));
@@ -125,7 +130,7 @@ function generateContract($client, $contractTypes, $driveService) {
             
             $templateProcessor->setValue('{{parcelas}}', $textInstallment);
         } else {
-            if (isset($cnpj)) {
+            if (isset($cnpj) || $contractType == 'Contrato de Honorários de assessoria') {
                 $day = date('d', strtotime($dueDate));
                 $textTotalValue .= " mensais, com vencimento no dia $day de cada mês, a iniciar em $formatDueDate.";
             } else {
