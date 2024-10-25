@@ -165,15 +165,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label for="contract_type">Tipos de Contrato:</label>
         <select id="contract_type" name="contract_type[]" multiple required>
-            <option value="honorarios">Honorários</option>
-            <option value="honorarios_valor">Honorários Com Valor</option>
-            <option value="procuracao">Procuração</option>
-            <option value="declaracao_hipo">Declaração de Hipossuficiência</option>
+            <option value="Contrato de Honorários do percentual">Contrato de Honorários do percentual</option>
+            <option value="Contrato de Honorários percentual + exito">Contrato de Honorários percentual + exito</option>
+            <option value="Contrato Previdenciário do êxito">Contrato Previdenciário do êxito</option>
+            <option value="Contrato Reclamação Trabalhista">Contrato Reclamação Trabalhista</option>
+            <option value="Declaração de Hipo">Declaração de Hipo</option>
+            <option value="Procuração">Procuração</option>
         </select>
         <small>Use Ctrl para selecionar multiplas opções</small>
 
-        <label for="description">Descrição do contrato:</label>
-        <textarea name="description" id="description" rows="4" required placeholder="O presente instrumento tem como objeto propor..."></textarea>
+        <div id="descriptionField" style="display: block;">
+            <label for="description">Do Objeto do Contrato:</label>
+            <textarea name="description" id="description" rows="4" placeholder="O presente instrumento tem como objeto propor..."></textarea>
+        </div>
 
         <div id="additionalFields" style="display: none;">
             <label for="amount">Valor Total:</label>
@@ -184,7 +188,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <label for="due_date">Data de vencimento / primeira parcela:</label>
             <input type="date" name="due_date" id="due_date">
+        </div>
 
+        <div id="percentualField" style="display: none;">
             <label for="percentage_of_success">Percentual do êxito:</label>
             <input type="number" name="percentage_of_success" id="percentage_of_success" placeholder="Digite o valor do êxito sobre o ganho" step="1">
         </div>
@@ -195,24 +201,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script>
     const contractTypeSelect = document.getElementById('contract_type');
+    const descriptionInput = document.getElementById('description');
     const amountInput = document.getElementById('amount');
     const dueDateInput = document.getElementById('due_date');
+    const percentualField = document.getElementById('percentualField');
     const additionalFields = document.getElementById('additionalFields');
+    const descriptionField = document.getElementById('descriptionField');
 
     contractTypeSelect.addEventListener('change', function() {
         const selectedValues = Array.from(contractTypeSelect.selectedOptions).map(option => option.value);
 
-        // Check if "honorarios_valor" is among the selected values
-        if (selectedValues.includes('honorarios_valor')) {
+        if (selectedValues.includes('Contrato de Honorários percentual + exito')) {
             additionalFields.style.display = 'block';
-        } else {
-            additionalFields.style.display = 'none';
-        }
-
-        if (selectedValues.includes('honorarios_valor')) {
+            percentualField.style.display = 'block';
             amountInput.required = true;
         } else {
+            if (!selectedValues.includes('Contrato de Honorários do percentual')) {
+                percentualField.style.display = 'none';
+            }
+            additionalFields.style.display = 'none';
             amountInput.required = false;
+        }
+
+        if (selectedValues.includes('Contrato de Honorários do percentual')) {
+            percentualField.style.display = 'block';
+        } else if (!selectedValues.includes('Contrato de Honorários percentual + exito')) {
+                percentualField.style.display = 'none';
+        }
+
+        if ((selectedValues.includes('Contrato Reclamação Trabalhista') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))) 
+            || selectedValues.includes('Declaração de Hipo') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))) {
+            descriptionField.style.display = 'none';
+            descriptionInput.required = false;
+        } else {
+            descriptionField.style.display = 'block';
+            descriptionInput.required = true;
         }
     });
 
@@ -235,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     document.getElementById('uploadForm').addEventListener('submit', async function(event) {
         const selectedValues = Array.from(contractTypeSelect.selectedOptions).map(option => option.value);
 
-        if (selectedValues.includes('honorarios_valor') && !amountInput.value) {
+        if (selectedValues.includes('Contrato de Honorários percentual + exito') && !amountInput.value) {
             alert('Campo de Valor Total é obrigátorio.');
         }
 

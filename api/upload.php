@@ -128,7 +128,7 @@ function generateContract($client, $contractTypes, $driveService) {
         $templateProcessor->setValue('{{remuneracao}}', $textTotalValue);
 
         $descValueOfSuccess = convertToWords($percentageOfSuccess);
-        $templateProcessor->setValue('{{percentual_ganho}}', "+ $percentageOfSuccess% ($descValueOfSuccess por cento) do valor do êxito");
+        $templateProcessor->setValue('{{percentual_ganho}}', "$percentageOfSuccess% ($descValueOfSuccess por cento) sobre o valor total do êxito");
     
         // Capture the content of the processed template as a string.
         ob_start();
@@ -142,7 +142,7 @@ function generateContract($client, $contractTypes, $driveService) {
         // Rewind the memory pointer to the beginning of the file.
         rewind($tempMemoryFile);
 
-        $fileName = $clientName . '_' . $contractType;
+        $fileName = $clientName . ' - ' . $contractType;
 
         // Upload the DOCX file to Google Drive
         $clientFolder = uploadToGoogleDrive($docxContent, $fileName, $clientName, $driveService);
