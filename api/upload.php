@@ -79,6 +79,7 @@ function generateContract($client, $contractTypes, $driveService) {
             return;
         }
     
+        $cnpj = $client['cnpj'];
         $description = $_POST['description'];
         $amount = $_POST['amount'] ?? 1;
         $installments = $_POST['installments'] ?? 1;
@@ -90,9 +91,12 @@ function generateContract($client, $contractTypes, $driveService) {
     
         // Replace placeholders with client data
         $templateProcessor->setValue('{{currency}}', htmlspecialchars("R$"));
+
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
         $templateProcessor->setValue('{{cpf}}', htmlspecialchars($client['cpf']));
         $templateProcessor->setValue('{{rg}}', htmlspecialchars($client['rg']));
+
+        $templateProcessor->setValue('{{cnpj}}', htmlspecialchars($cnpj));
         
         $templateProcessor->setValue('{{logradouro}}', htmlspecialchars($client['logradouro']));
         $templateProcessor->setValue('{{numero}}', htmlspecialchars($client['numero']));
@@ -106,12 +110,12 @@ function generateContract($client, $contractTypes, $driveService) {
         $templateProcessor->setValue('{{data_contrato}}', strftime('%d de %B de %Y', strtotime('today')));
 
         $textTotalValue = '';
-        $dueDate = date('d/m/Y', strtotime($dueDate));
+        $formatDueDate = date('d/m/Y', strtotime($dueDate));
         if (is_numeric($amount)) {
             $totalValue = number_format($amount, 2, ',', '');
             $descTotalValue = convertToWordsWithCurrency($amount);
             $textTotalValue = "R$ $totalValue ($descTotalValue) ";
-        }     
+        }
         
         if (is_numeric($installments)) {
             $descNumberInstallments = convertToWords($installments);
@@ -121,7 +125,12 @@ function generateContract($client, $contractTypes, $driveService) {
             
             $templateProcessor->setValue('{{parcelas}}', $textInstallment);
         } else {
-            $textTotalValue .= " com vencimento no dia $dueDate";
+            if (isset($cnpj)) {
+                $day = date('d', strtotime($dueDate));
+                $textTotalValue .= " mensais, com vencimento no dia $day de cada mês, a iniciar em $formatDueDate.";
+            } else {
+                $textTotalValue .= " com vencimento no dia $formatDueDate";
+            }
             $templateProcessor->setValue('{{parcelas}}', "");
         }
 

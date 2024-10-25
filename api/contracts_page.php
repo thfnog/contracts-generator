@@ -165,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label for="contract_type">Tipos de Contrato:</label>
         <select id="contract_type" name="contract_type[]" multiple required>
+            <option value="Contrato de Honorários de assessoria">Contrato de Honorários de assessoria</option>
             <option value="Contrato de Honorários do percentual">Contrato de Honorários do percentual</option>
             <option value="Contrato de Honorários percentual + exito">Contrato de Honorários percentual + exito</option>
             <option value="Contrato Previdenciário do êxito">Contrato Previdenciário do êxito</option>
@@ -183,11 +184,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="amount">Valor Total:</label>
             <input type="number" name="amount" id="amount" placeholder="Digite o total" step="0.01">
 
+            <label for="due_date">Data de vencimento:</label>
+            <input type="date" name="due_date" id="due_date">
+        </div>
+
+        <div id="installmentField" style="display: none;">
             <label for="installments">Quantidade de parcelas:</label>
             <input type="number" name="installments" id="installments" placeholder="Digite a quantidade de parcelas" step="1">
-
-            <label for="due_date">Data de vencimento / primeira parcela:</label>
-            <input type="date" name="due_date" id="due_date">
         </div>
 
         <div id="percentualField" style="display: none;">
@@ -201,12 +204,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script>
     const contractTypeSelect = document.getElementById('contract_type');
+    
     const descriptionInput = document.getElementById('description');
     const amountInput = document.getElementById('amount');
     const dueDateInput = document.getElementById('due_date');
+
     const percentualField = document.getElementById('percentualField');
     const additionalFields = document.getElementById('additionalFields');
+    const installmentField = document.getElementById('installmentField');
     const descriptionField = document.getElementById('descriptionField');
+    descriptionField.style.display = 'none';
 
     contractTypeSelect.addEventListener('change', function() {
         const selectedValues = Array.from(contractTypeSelect.selectedOptions).map(option => option.value);
@@ -214,11 +221,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (selectedValues.includes('Contrato de Honorários percentual + exito')) {
             additionalFields.style.display = 'block';
             percentualField.style.display = 'block';
+            installmentField.style.display = 'block';
             amountInput.required = true;
         } else {
             if (!selectedValues.includes('Contrato de Honorários do percentual')) {
                 percentualField.style.display = 'none';
             }
+            installmentField.style.display = 'none';
             additionalFields.style.display = 'none';
             amountInput.required = false;
         }
@@ -229,13 +238,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 percentualField.style.display = 'none';
         }
 
-        if ((selectedValues.includes('Contrato Reclamação Trabalhista') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))) 
-            || selectedValues.includes('Declaração de Hipo') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))) {
+        if (selectedValues.includes('Contrato de Honorários de assessoria') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração')) 
+            || selectedValues.includes('Declaração de Hipo') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))
+            || selectedValues.includes('Contrato Reclamação Trabalhista') && (!selectedValues.includes('Contrato de Honorários do percentual') && !selectedValues.includes('Contrato de Honorários percentual + exito') && !selectedValues.includes('Contrato Previdenciário do êxito') && !selectedValues.includes('Procuração'))) {
             descriptionField.style.display = 'none';
             descriptionInput.required = false;
+            
+            if (selectedValues.includes('Contrato de Honorários de assessoria')) {
+                additionalFields.style.display = 'block';
+                amountInput.required = true;
+            } else {
+                additionalFields.style.display = 'none';
+                amountInput.required = false;
+            }
         } else {
             descriptionField.style.display = 'block';
             descriptionInput.required = true;
+
+            if (!selectedValues.includes('Contrato de Honorários de assessoria') && !selectedValues.includes('Contrato de Honorários percentual + exito')) {
+                additionalFields.style.display = 'none';
+                amountInput.required = true;
+            } else {
+                additionalFields.style.display = 'block';
+                amountInput.required = false;
+            }
         }
     });
 

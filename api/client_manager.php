@@ -33,8 +33,13 @@ function addUser(array $data) {
     // Query to check if a user with the same nome and cpf exists
     $queryByCpf = $collection->where('cpf', '=', $data['cpf'])->documents();
 
+    // Query to check if a user with the same nome and cnpj exists
+    $queryByCnpj = $collection->where('cnpj', '=', $data['cnpj'])->documents();
+
     // Check if any documents were returned by the query
     if (!$queryByCpf->isEmpty()) {
+        throw new Exception('Usuário com mesmo CPF já existe.');
+    } else if (!$queryByCnpj->isEmpty()) {
         throw new Exception('Usuário com mesmo CPF já existe.');
     }
 
@@ -45,6 +50,7 @@ function addUser(array $data) {
         'telefone' => $data['telefone'],
         'cpf' => $data['cpf'],
         'rg' => $data['rg'],
+        'cnpj' => $data['cnpj'],
         'logradouro' => $data['logradouro'],
         'numero' => $data['numero'],
         'bairro' => $data['bairro'],

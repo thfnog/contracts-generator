@@ -172,6 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="contracts_page.php" class="button">Voltar</a>
 
     <form id="newClientForm" onsubmit="event.preventDefault();">
+        <label>
+            <input type="radio" name="person_type" value="fisica" id="fisica" checked> Pessoa Física
+        </label>
+        <label>
+            <input type="radio" name="person_type" value="juridica" id="juridica"> Pessoa Jurídica
+        </label>
+
         <input type="hidden" name="action" value="create">
 
         <!-- Name: Allows letters, spaces, and accented characters -->
@@ -183,11 +190,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Phone: Brazilian phone format (with or without area code) -->
         <input type="text" name="telefone" class="form-control" placeholder="Telefone" required>
 
-        <!-- CPF: 11 digits with optional formatting (###.###.###-##) -->
-        <input type="text" name="cpf" placeholder="CPF" required >
+        <div id="fisica_fields">
+            <input id="cpf" type="text" name="cpf" placeholder="CPF" required>
+            <input id="rg" type="text" name="rg" placeholder="RG" required>
+        </div>
 
-        <!-- RG: Alphanumeric characters, typically 7-14 characters -->
-        <input type="text" name="rg" placeholder="RG" required>
+        <div id="juridica_fields">
+            <input id="cnpj" type="text" name="cnpj" placeholder="CNPJ" required>
+        </div>       
 
         <!-- Address: Free text, allowing letters, numbers, and spaces -->
         <input type="text" name="logradouro" placeholder="Logradouro" required>
@@ -217,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <ul>
         <?php foreach ($clients as $uid => $client): ?>
             <li>
-                <?= htmlspecialchars($client['nome']) ?> - <?= htmlspecialchars($client['cpf']) ?>
+                <?= htmlspecialchars($client['nome']) ?>
                 <form class="deleteClientForm" style="display: inline;" onsubmit="event.preventDefault();">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="uid" value="<?= htmlspecialchars($uid) ?>">
@@ -228,6 +238,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </ul>
 </body>
 <script>
+    const fisicaRadio = document.getElementById('fisica');
+    const juridicaRadio = document.getElementById('juridica');
+    const fisicaFields = document.getElementById('fisica_fields');
+    const juridicaFields = document.getElementById('juridica_fields');
+    const cpfField = document.getElementById('cpf');
+    const rgField = document.getElementById('rg');
+    const cnpjField = document.getElementById('cnpj');
+
+    function toggleFields() {
+        if (fisicaRadio.checked) {
+            // Show Pessoa Física fields, hide Pessoa Jurídica fields
+            fisicaFields.style.display = 'block';
+            juridicaFields.style.display = 'none';
+            
+            // Set required attributes for Pessoa Física
+            cpfField.required = true;
+            rgField.required = true;
+            cnpjField.required = false;
+        } else if (juridicaRadio.checked) {
+            // Show Pessoa Jurídica fields, hide Pessoa Física fields
+            fisicaFields.style.display = 'none';
+            juridicaFields.style.display = 'block';
+            
+            // Set required attributes for Pessoa Jurídica
+            cpfField.required = false;
+            rgField.required = false;
+            cnpjField.required = true;
+        }
+    }
+
+    // Add event listeners to toggle the fields based on selected option
+    fisicaRadio.addEventListener('change', toggleFields);
+    juridicaRadio.addEventListener('change', toggleFields);
+
+    // Initialize fields based on default selection
+    toggleFields();
+
     document.querySelector('form').addEventListener('submit', function (event) {
         const form = event.target;
 
