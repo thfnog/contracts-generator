@@ -257,10 +257,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!selectedValues.includes('Contrato de Honorários de assessoria') && !selectedValues.includes('Contrato de Honorários percentual + exito')) {
                 additionalFields.style.display = 'none';
-                amountInput.required = true;
+                amountInput.required = false;
             } else {
                 additionalFields.style.display = 'block';
-                amountInput.required = false;
+                amountInput.required = true;
             }
         }
     });
