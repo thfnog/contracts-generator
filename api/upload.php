@@ -93,14 +93,14 @@ function generateContract($client, $contractTypes, $driveService) {
         $templateProcessor->setValue('{{currency}}', htmlspecialchars("R$"));
 
         $cpf = $client['cpf'];
-        if (isset($cpf)) {
+        if (isset($cpf) && !empty($cpf)) {
             $rg = $client['rg'];
-            $pessoaFisicaText = "pessoa natural, brasileira, portadora da Cédula de Identidade RG nº$rg , inscrito no CPF/MF sob o nº $cpf, residente e domiciliado à";
+            $pessoaFisicaText = "pessoa natural, brasileira, portadora da Cédula de Identidade RG nº $rg , inscrito no CPF/MF sob o nº $cpf, residente e domiciliado à";
             $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaFisicaText));
                         
             $signatureText = "CPF sob o nº $cpf";
             $templateProcessor->setValue('{{assinatura}}', htmlspecialchars($signatureText));
-        } else if (isset($cnpj)) {
+        } else {
             $pessoaJuridicaText = "pessoa jurídica de direito privado, devidamente inscrita no CNPJ/MF sob n° $cnpj, com sede na";
             $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaJuridicaText));
 
@@ -136,7 +136,7 @@ function generateContract($client, $contractTypes, $driveService) {
             
             $templateProcessor->setValue('{{parcelas}}', $textInstallment);
         } else {
-            if (isset($cnpj) || $contractType == 'Contrato de Honorários de assessoria') {
+            if ((isset($cnpj) && !empty($cnpj)) || $contractType == 'Contrato de Honorários de assessoria') {
                 $day = date('d', strtotime($dueDate));
                 $textTotalValue .= " mensais, com vencimento no dia $day de cada mês, a iniciar em $formatDueDate.";
             } else {
