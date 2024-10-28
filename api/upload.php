@@ -95,11 +95,17 @@ function generateContract($client, $contractTypes, $driveService) {
         $cpf = $client['cpf'];
         if (isset($cpf)) {
             $rg = $client['rg'];
-            $pessoaFisicaText = "pessoa natural, brasileira, portadora da Cédula de Identidade RG nº $cpf, inscrito no CPF/MF sob o nº $rg, residente e domiciliado à";
+            $pessoaFisicaText = "pessoa natural, brasileira, portadora da Cédula de Identidade RG nº$rg , inscrito no CPF/MF sob o nº $cpf, residente e domiciliado à";
             $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaFisicaText));
+                        
+            $signatureText = "CPF sob o nº $cpf";
+            $templateProcessor->setValue('{{assinatura}}', htmlspecialchars($signatureText));
         } else if (isset($cnpj)) {
             $pessoaJuridicaText = "pessoa jurídica de direito privado, devidamente inscrita no CNPJ/MF sob n° $cnpj, com sede na";
             $templateProcessor->setValue('{{tipo_pessoa}}', htmlspecialchars($pessoaJuridicaText));
+
+            $signatureText = "CNPJ/MF sob n° $cnpj";
+            $templateProcessor->setValue('{{assinatura}}', htmlspecialchars($signatureText));
         }
         $templateProcessor->setValue('{{nome}}', htmlspecialchars($clientName));
         
