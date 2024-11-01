@@ -275,22 +275,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Initialize fields based on default selection
     toggleFields();
 
-    document.querySelector('form').addEventListener('submit', function (event) {
-        const form = event.target;
-
-        // Create an invisible iframe to start the file download.
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.onload = function () {
-            // Once the iframe loads (file download starts), reset the form.
-            form.reset();
-        };
-        // Set the iframe source to the form's action (where the download happens).
-        iframe.src = form.action;
-
-        document.body.appendChild(iframe);
-    });
-
     function showLoading() {
         document.getElementById('loading-overlay').style.display = 'flex';
     }
@@ -309,7 +293,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             makeRequest(formData);
         } catch (error) {
             console.error('Error trying to create new user:', error);
-            alert('Um erro ocorreu ao adicionar novo usuário.');
         } finally {
             hideLoading();
         }
@@ -326,7 +309,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 await makeRequest(formData);
             } catch (error) {
                 console.error('Error trying to delete user:', error);
-                alert('Um erro ocorreu ao tentar remover usuário.');
             } finally {
                 hideLoading();
             }

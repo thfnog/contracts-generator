@@ -30,17 +30,22 @@ function addUser(array $data) {
     $firestore = initializeFirestoreClient();
     $collection = $firestore->collection('clients');
 
-    // Query to check if a user with the same nome and cpf exists
-    $queryByCpf = $collection->where('cpf', '=', $data['cpf'])->documents();
+    $cpf = $data['cpf'];
+    $cnpj = $data['cnpj'];
+    if (isset($cpf) && !empty($cpf)) {
+        // Query to check if a user with the same nome and cpf exists
+        $queryByCpf = $collection->where('cpf', '=', $cpf)->documents();
+        
+        if (!$queryByCpf->isEmpty()) {
+            throw new Exception('Cliente com mesmo CPF já existe.');
+        }
+    } else if (isset($cnpj) && !empty($cnpj)) {
+        // Query to check if a user with the same nome and cnpj exists
+        $queryByCnpj = $collection->where('cnpj', '=', $cnpj)->documents();
 
-    // Query to check if a user with the same nome and cnpj exists
-    $queryByCnpj = $collection->where('cnpj', '=', $data['cnpj'])->documents();
-
-    // Check if any documents were returned by the query
-    if (!$queryByCpf->isEmpty()) {
-        throw new Exception('Usuário com mesmo CPF já existe.');
-    } else if (!$queryByCnpj->isEmpty()) {
-        throw new Exception('Usuário com mesmo CPF já existe.');
+        if (!$queryByCnpj->isEmpty()) {
+            throw new Exception('Cliente com mesmo CNPJ já existe.');
+        }
     }
 
     $newUserRef = $collection->newDocument();
@@ -48,9 +53,9 @@ function addUser(array $data) {
         'nome' => $data['nome'],
         'email' => $data['email'],
         'telefone' => $data['telefone'],
-        'cpf' => $data['cpf'],
+        'cpf' => $cpf,
         'rg' => $data['rg'],
-        'cnpj' => $data['cnpj'],
+        'cnpj' => $cnpj,
         'logradouro' => $data['logradouro'],
         'numero' => $data['numero'],
         'bairro' => $data['bairro'],
